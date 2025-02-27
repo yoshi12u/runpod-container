@@ -18,11 +18,20 @@ RUN mkdir /workspace
 # Update, upgrade, install packages, install python if PYTHON_VERSION is specified, clean up
 RUN apt-get update --yes && \
     apt-get upgrade --yes && \
-    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx && \
+    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx fzf ripgrep && \
     if [ -n "${PYTHON_VERSION}" ]; then \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" -y --no-install-recommends; \
     fi && \
+    # Install cargo for Rust-based tools
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    # Install Rust-based CLI tools
+    . "$HOME/.cargo/env" && \
+    cargo install nushell starship bat lsd && \
+    # Add cargo binaries to PATH
+    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc && \
+    # Set up starship prompt
+    echo 'eval "$(starship init bash)"' >> /root/.bashrc && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -30,24 +39,19 @@ RUN apt-get update --yes && \
 
 # Set up Python and pip only if PYTHON_VERSION is specified
 RUN if [ -n "${PYTHON_VERSION}" ]; then \
-    ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
-    rm /usr/bin/python3 && \
-    ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
+    ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
+    ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python get-pip.py; \
+    python get-pip.py && \
+    rm get-pip.py \
     fi
 
-
-RUN pip install --upgrade --no-cache-dir pip
-RUN pip install --upgrade --no-cache-dir jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions
-
-# Set up Jupyter Notebook
-RUN pip install notebook==6.5.5
-RUN jupyter contrib nbextension install --user && \
+# Upgrade pip and install Python packages
+RUN pip install --upgrade --no-cache-dir pip && \
+    pip install --upgrade --no-cache-dir \
+    jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 uv && \
+    jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension
-
-# Set up uv
-RUN pip install uv
 
 # Remove existing SSH host keys
 RUN rm -f /etc/ssh/ssh_host_*
@@ -59,6 +63,9 @@ COPY --from=proxy readme.html /usr/share/nginx/html/readme.html
 # Copy the README.md
 COPY README.md /usr/share/nginx/html/README.md
 
+# Nushell
+COPY --from=nushell config.nu /root/.config/nushell/config.nu
+
 # Start Scripts
 COPY --from=scripts start.sh /
 RUN chmod +x /start.sh
@@ -66,7 +73,6 @@ RUN chmod +x /start.sh
 # Welcome Message
 COPY --from=logo runpod.txt /etc/runpod.txt
 RUN echo 'cat /etc/runpod.txt' >> /root/.bashrc
-RUN echo 'echo -e "\nFor detailed documentation and guides, please visit:\n\033[1;34mhttps://docs.runpod.io/\033[0m and \033[1;34mhttps://blog.runpod.io/\033[0m\n\n"' >> /root/.bashrc
 
 # Set the default command for the container
 CMD [ "/start.sh" ]

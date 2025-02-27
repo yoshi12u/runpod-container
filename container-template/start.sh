@@ -66,8 +66,15 @@ setup_ssh() {
 # Export env vars
 export_env_vars() {
     echo "Exporting environment variables..."
+    # For bash
     printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /etc/rp_environment
+    chmod +r /etc/rp_environment
     echo 'source /etc/rp_environment' >> ~/.bashrc
+    
+    # For nushell
+    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "let-env " $1 " = \"" $2 "\"" }' > /etc/rp_environment.nu
+    chmod +r /etc/rp_environment.nu
+    echo 'source /etc/rp_environment.nu' >> ~/.config/nushell/config.nu
 }
 
 # Start jupyter lab
@@ -76,7 +83,7 @@ start_jupyter() {
         echo "Starting Jupyter Lab..."
         mkdir -p /workspace && \
         cd / && \
-        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
+        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/root/.cargo/bin/nu"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
         echo "Jupyter Lab started"
     fi
 }
