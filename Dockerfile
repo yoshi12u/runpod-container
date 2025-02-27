@@ -8,6 +8,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
+ENV JUPYTER_IDLE_TIMEOUT=60
 
 # Set the working directory
 WORKDIR /

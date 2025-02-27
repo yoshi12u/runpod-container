@@ -77,14 +77,52 @@ export_env_vars() {
     echo 'source /etc/rp_environment.nu' >> ~/.config/nushell/config.nu
 }
 
-# Start jupyter lab
+# Start jupyter lab with idle timeout
 start_jupyter() {
     if [[ $JUPYTER_PASSWORD ]]; then
-        echo "Starting Jupyter Lab..."
+        # Set default idle timeout to 60 minutes if not specified
+        JUPYTER_IDLE_TIMEOUT=${JUPYTER_IDLE_TIMEOUT:-60}
+        echo "Starting Jupyter Lab with idle timeout of ${JUPYTER_IDLE_TIMEOUT} minutes..."
         mkdir -p /workspace && \
         cd / && \
-        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/root/.cargo/bin/nu"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
-        echo "Jupyter Lab started"
+        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* \
+            --FileContentsManager.delete_to_trash=False \
+            --ServerApp.terminado_settings='{"shell_command":["/root/.cargo/bin/nu"]}' \
+            --ServerApp.token=$JUPYTER_PASSWORD \
+            --ServerApp.allow_origin=* \
+            --ServerApp.preferred_dir=/workspace \
+            --MappingKernelManager.cull_idle_timeout=$((JUPYTER_IDLE_TIMEOUT * 60)) \
+            --MappingKernelManager.cull_interval=60 \
+            --MappingKernelManager.cull_connected=True \
+            --ServerApp.shutdown_no_activity_timeout=$((JUPYTER_IDLE_TIMEOUT * 60)) \
+            &> /jupyter.log &
+        
+        # Store the Jupyter process ID
+        JUPYTER_PID=$!
+        echo "Jupyter Lab started with PID: $JUPYTER_PID"
+        echo $JUPYTER_PID > /jupyter.pid
+    fi
+}
+
+# Monitor Jupyter and shutdown container when it exits
+monitor_jupyter_and_shutdown() {
+    if [[ -f /jupyter.pid ]]; then
+        JUPYTER_PID=$(cat /jupyter.pid)
+        echo "Monitoring Jupyter process (PID: $JUPYTER_PID)..."
+        
+        # Start monitoring in background
+        (
+            # Wait for the Jupyter process to finish
+            while kill -0 $JUPYTER_PID 2>/dev/null; do
+                sleep 10
+            done
+            
+            echo "Jupyter process has terminated. Shutting down container..."
+            # Give some time for cleanup
+            sleep 5
+            # Exit the container
+            kill 1
+        ) &
     fi
 }
 
@@ -101,9 +139,12 @@ echo "Pod Started"
 setup_ssh
 start_jupyter
 export_env_vars
+monitor_jupyter_and_shutdown
 
 execute_script "/post_start.sh" "Running post-start script..."
 
 echo "Start script(s) finished, pod is ready to use."
+echo "Jupyter will automatically shutdown after ${JUPYTER_IDLE_TIMEOUT:-60} minutes of inactivity, which will terminate the container."
 
-sleep infinity
+# Wait for signals
+wait
