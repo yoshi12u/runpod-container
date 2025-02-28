@@ -44,7 +44,7 @@ jobs:
             type=raw,value=${{ env.TARGET }}
 
       - name: Build and push Docker image
-        uses: docker/bake-action@v4
+        uses: docker/bake-action@v5
         with:
           files: |
             ./docker-bake.hcl
