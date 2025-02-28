@@ -16,31 +16,42 @@ WORKDIR /
 # Create workspace directory
 RUN mkdir /workspace
 
-# Update, upgrade, install packages, install python if PYTHON_VERSION is specified, clean up
+# Update and upgrade system packages
 RUN apt-get update --yes && \
-    apt-get upgrade --yes && \
-    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx fzf ripgrep build-essential libssl-dev pkg-config cmake unzip fontconfig && \
-    if [ -n "${PYTHON_VERSION}" ]; then \
+    apt-get upgrade --yes
+
+# Install system dependencies
+RUN apt install --yes --no-install-recommends \
+    git wget curl bash libgl1 software-properties-common \
+    openssh-server nginx fzf ripgrep build-essential \
+    libssl-dev pkg-config cmake unzip fontconfig
+
+# Install Python if PYTHON_VERSION is specified
+RUN if [ -n "${PYTHON_VERSION}" ]; then \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" -y --no-install-recommends; \
-    fi && \
-    # Install cargo for Rust-based tools
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    # Install Rust-based CLI tools
+    fi
+
+# Install Rust and cargo
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     . "$HOME/.cargo/env" && \
+    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc
+
+# Install Rust-based CLI tools
+RUN . "$HOME/.cargo/env" && \
     cargo install nu starship bat lsd && \
-    # Install Nerd Fonts
-    mkdir -p /usr/local/share/fonts/NerdFonts && \
+    echo 'eval "$(starship init bash)"' >> /root/.bashrc
+
+# Install Nerd Fonts
+RUN mkdir -p /usr/local/share/fonts/NerdFonts && \
     cd /usr/local/share/fonts/NerdFonts && \
     wget -q https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip && \
     unzip -q JetBrainsMono.zip && \
     rm JetBrainsMono.zip && \
-    fc-cache -fv && \
-    # Add cargo binaries to PATH
-    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc && \
-    # Set up starship prompt
-    echo 'eval "$(starship init bash)"' >> /root/.bashrc && \
-    apt-get autoremove -y && \
+    fc-cache -fv
+
+# Clean up
+RUN apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -54,11 +65,15 @@ RUN if [ -n "${PYTHON_VERSION}" ]; then \
     rm get-pip.py; \
     fi
 
-# Upgrade pip and install Python packages
-RUN pip install --upgrade --no-cache-dir pip && \
-    pip install --upgrade --no-cache-dir \
-    jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 uv && \
-    jupyter contrib nbextension install --user && \
+# Upgrade pip
+RUN pip install --upgrade --no-cache-dir pip
+
+# Install Python packages
+RUN pip install --upgrade --no-cache-dir \
+    jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 uv
+
+# Set up Jupyter extensions
+RUN jupyter contrib nbextension install --user && \
     jupyter nbextension enable --py widgetsnbextension
 
 # Remove existing SSH host keys
