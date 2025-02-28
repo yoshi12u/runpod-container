@@ -28,14 +28,7 @@ RUN apt-get update --yes && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     # Install Rust-based CLI tools
     . "$HOME/.cargo/env" && \
-    cargo install nu starship bat lsd && \
-    # Install Nerd Fonts
-    mkdir -p /usr/local/share/fonts/NerdFonts && \
-    cd /usr/local/share/fonts/NerdFonts && \
-    wget -q https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip && \
-    unzip -q JetBrainsMono.zip && \
-    rm JetBrainsMono.zip && \
-    fc-cache -fv && \
+    cargo install nu starship bat && \
     # Add cargo binaries to PATH
     echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc && \
     # Set up starship prompt
