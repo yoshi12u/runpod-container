@@ -68,11 +68,11 @@ COPY README.md /usr/share/nginx/html/README.md
 COPY ./container-template/nushell/config.nu /root/.config/nushell/config.nu
 
 # Start Scripts
-COPY ./container-template/scripts/start.sh /
+COPY ./container-template/start.sh /
 RUN chmod +x /start.sh
 
 # Welcome Message
-COPY ./container-template/logo/runpod.txt /etc/runpod.txt
+COPY ./container-template/runpod.txt /etc/runpod.txt
 RUN echo 'cat /etc/runpod.txt' >> /root/.bashrc
 
 # Set the default command for the container
