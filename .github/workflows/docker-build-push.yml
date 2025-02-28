@@ -33,8 +33,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=${{ github.ref_name }}
+            type=raw,value=${{ github.sha }}
+            type=raw,value=${{ env.TARGET }}
+
       - name: Build and push Docker image
-        uses: docker/bake-action@v5
+        uses: docker/bake-action@v6
         with:
           files: |
             ./docker-bake.hcl
@@ -44,4 +55,4 @@ jobs:
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
-            *.tags=[${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}]
+            *.tags=${{ steps.meta.outputs.tags }}
