@@ -55,4 +55,3 @@ jobs:
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
             *.tags=${{ join(fromJSON(steps.meta.outputs.json).tags, ',') }}
-            ${{ join(format('*.labels.%s', fromJSON(steps.meta.outputs.json).labels), '\n') }}
