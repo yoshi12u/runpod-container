@@ -68,11 +68,13 @@ export_env_vars() {
     echo "Exporting environment variables..."
     # For bash
     printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /etc/rp_environment
+    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /etc/rp_environment
     chmod +r /etc/rp_environment
     echo 'source /etc/rp_environment' >> ~/.bashrc
     
     # For nushell
     printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "let-env " $1 " = \"" $2 "\"" }' > /etc/rp_environment.nu
+    echo 'let-env PATH = ($env.PATH | prepend $"($env.HOME)/.cargo/bin")' >> /etc/rp_environment.nu
     chmod +r /etc/rp_environment.nu
     echo 'source /etc/rp_environment.nu' >> ~/.config/nushell/config.nu
 }
