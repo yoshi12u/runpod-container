@@ -44,7 +44,7 @@ RUN if [ -n "${PYTHON_VERSION}" ]; then \
     ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py && \
-    rm get-pip.py \
+    rm get-pip.py; \
     fi
 
 # Upgrade pip and install Python packages
