@@ -75,5 +75,8 @@ RUN chmod +x /start.sh
 COPY ./container-template/runpod.txt /etc/runpod.txt
 RUN echo 'cat /etc/runpod.txt' >> /root/.bashrc
 
+# Set the default working directory
+WORKDIR /workspace
+
 # Set the default command for the container
 CMD [ "/start.sh" ]
