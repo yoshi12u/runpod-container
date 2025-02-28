@@ -19,7 +19,7 @@ RUN mkdir /workspace
 # Update, upgrade, install packages, install python if PYTHON_VERSION is specified, clean up
 RUN apt-get update --yes && \
     apt-get upgrade --yes && \
-    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx fzf ripgrep && \
+    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx fzf ripgrep build-essential && \
     if [ -n "${PYTHON_VERSION}" ]; then \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" -y --no-install-recommends; \
@@ -28,7 +28,7 @@ RUN apt-get update --yes && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     # Install Rust-based CLI tools
     . "$HOME/.cargo/env" && \
-    cargo install nushell starship bat lsd && \
+    cargo install nu starship bat lsd && \
     # Add cargo binaries to PATH
     echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc && \
     # Set up starship prompt
