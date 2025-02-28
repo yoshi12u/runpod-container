@@ -19,7 +19,7 @@ RUN mkdir /workspace
 # Update, upgrade, install packages, install python if PYTHON_VERSION is specified, clean up
 RUN apt-get update --yes && \
     apt-get upgrade --yes && \
-    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx fzf ripgrep build-essential libssl-dev pkg-config cmake && \
+    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server nginx fzf ripgrep build-essential libssl-dev pkg-config cmake unzip fontconfig && \
     if [ -n "${PYTHON_VERSION}" ]; then \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" -y --no-install-recommends; \
@@ -29,6 +29,13 @@ RUN apt-get update --yes && \
     # Install Rust-based CLI tools
     . "$HOME/.cargo/env" && \
     cargo install nu starship bat lsd && \
+    # Install Nerd Fonts
+    mkdir -p /usr/local/share/fonts/NerdFonts && \
+    cd /usr/local/share/fonts/NerdFonts && \
+    wget -q https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip && \
+    unzip -q JetBrainsMono.zip && \
+    rm JetBrainsMono.zip && \
+    fc-cache -fv && \
     # Add cargo binaries to PATH
     echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc && \
     # Set up starship prompt
