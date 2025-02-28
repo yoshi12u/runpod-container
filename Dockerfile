@@ -58,21 +58,21 @@ RUN pip install --upgrade --no-cache-dir pip && \
 RUN rm -f /etc/ssh/ssh_host_*
 
 # NGINX Proxy
-COPY --from=proxy nginx.conf /etc/nginx/nginx.conf
-COPY --from=proxy readme.html /usr/share/nginx/html/readme.html
+COPY ./container-template/proxy/nginx.conf /etc/nginx/nginx.conf
+COPY ./container-template/proxy/readme.html /usr/share/nginx/html/readme.html
 
 # Copy the README.md
 COPY README.md /usr/share/nginx/html/README.md
 
 # Nushell
-COPY --from=nushell config.nu /root/.config/nushell/config.nu
+COPY ./container-template/nushell/config.nu /root/.config/nushell/config.nu
 
 # Start Scripts
-COPY --from=scripts start.sh /
+COPY ./container-template/scripts/start.sh /
 RUN chmod +x /start.sh
 
 # Welcome Message
-COPY --from=logo runpod.txt /etc/runpod.txt
+COPY ./container-template/logo/runpod.txt /etc/runpod.txt
 RUN echo 'cat /etc/runpod.txt' >> /root/.bashrc
 
 # Set the default command for the container
