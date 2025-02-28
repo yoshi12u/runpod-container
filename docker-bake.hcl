@@ -1,7 +1,3 @@
-variable "PUBLISHER" {
-    default = "yoshi12u"
-}
-
 group "default" {
     targets = [
         ### CUDA ###
@@ -9,11 +5,8 @@ group "default" {
     ]
 }
 
-
-
 target "py311-cuda1280-runtime-ubuntu2004" {
     dockerfile = "Dockerfile"
-    tags = ["${PUBLISHER}/runpod-container:python3.11-cuda12.8.0-runtime-ubuntu20.04"]
     contexts = {
         scripts = "../../container-template"
         proxy = "../../container-template/proxy"
