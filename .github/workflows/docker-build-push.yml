@@ -54,5 +54,5 @@ jobs:
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+            *.tags=${{ join(fromJSON(steps.meta.outputs.json).tags, ',') }}
+            *.labels=${{ join(fromJSON(steps.meta.outputs.json).labels, ',') }}
