@@ -42,6 +42,4 @@ jobs:
             ${{ env.TARGET }}
           push: true
           set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
             *.tags=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET }}-${{ github.ref_name }}-${{ github.sha }}
