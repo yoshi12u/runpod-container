@@ -54,5 +54,5 @@ jobs:
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
-            ${{ env.TARGET }}.tags=${{ steps.meta.outputs.tags }}
-            ${{ env.TARGET }}.labels=${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
