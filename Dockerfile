@@ -71,9 +71,7 @@ COPY --from=nushell config.nu /root/.config/nushell/config.nu
 COPY --from=scripts start.sh /
 RUN chmod +x /start.sh
 
-# Welcome Message
-COPY --from=logo runpod.txt /etc/runpod.txt
-RUN echo 'cat /etc/runpod.txt' >> /root/.bashrc
+RUN echo 'echo "You are on RunPod"' >> /root/.bashrc
 
 # Set the default command for the container
 CMD [ "/start.sh" ]
