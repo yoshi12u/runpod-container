@@ -8,7 +8,7 @@ group "default" {
 target "py311-cuda1280-runtime-ubuntu2004" {
     dockerfile = "Dockerfile"
     args = {
-        BASE_IMAGE = "nvidia/cuda:12.8.0-runtime-ubuntu20.04"
+        BASE_IMAGE = "nvidia/cuda:12.4.1-devel-ubuntu22.04"
         PYTHON_VERSION = "3.11"
     }
 }
