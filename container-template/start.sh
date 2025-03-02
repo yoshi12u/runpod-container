@@ -86,7 +86,6 @@ start_jupyter() {
         JUPYTER_IDLE_TIMEOUT=${JUPYTER_IDLE_TIMEOUT:-60}
         echo "Starting Jupyter Lab with idle timeout of ${JUPYTER_IDLE_TIMEOUT} minutes..."
         mkdir -p /workspace && \
-        cd / && \
         nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* \
             --FileContentsManager.delete_to_trash=False \
             --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' \
@@ -114,15 +113,21 @@ monitor_jupyter_and_shutdown() {
         # Start monitoring in background
         (
             # Wait for the Jupyter process to finish
-            while kill -0 $JUPYTER_PID 2>/dev/null; do
+            while ps -p $JUPYTER_PID > /dev/null 2>&1; do
+                echo "Jupyter process is still running. Container will continue running."
                 sleep 10
             done
             
-            echo "Jupyter process has terminated. Shutting down container..."
-            # Give some time for cleanup
-            sleep 5
-            # Exit the container
-            kill 1
+            # Double check if the process is really gone
+            if ! ps -p $JUPYTER_PID > /dev/null 2>&1; then
+                echo "Jupyter process has terminated. Shutting down container..."
+                # Give some time for cleanup
+                sleep 5
+                # Exit the container
+                kill 1
+            else
+                echo "Jupyter process is still running. Container will continue running."
+            fi
         ) &
     fi
 }
