@@ -8,6 +8,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
+ENV VIRTUAL_ENV=/workspace/.venv
 ENV JUPYTER_IDLE_TIMEOUT=60
 
 # Set the working directory
@@ -47,12 +48,23 @@ RUN if [ -n "${PYTHON_VERSION}" ]; then \
     rm get-pip.py; \
     fi
 
-# Upgrade pip and install Python packages
+# Set the default working directory
+WORKDIR /workspace
+
+# Upgrade pip and install uv
 RUN pip install --upgrade --no-cache-dir pip && \
-    pip install --upgrade --no-cache-dir \
-    jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 uv && \
-    jupyter contrib nbextension install --user && \
-    jupyter nbextension enable --py widgetsnbextension
+    pip install --upgrade --no-cache-dir uv
+
+# Create venv and install Python packages
+RUN if [ -n "${PYTHON_VERSION}" ]; then \
+    uv venv --python ${PYTHON_VERSION} && \
+    uv add jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 && \
+    uv run jupyter contrib nbextension install --user && \
+    uv run jupyter nbextension enable --py widgetsnbextension; \
+    fi
+
+# Activate venv
+RUN source .venv/bin/activate
 
 # Remove existing SSH host keys
 RUN rm -f /etc/ssh/ssh_host_*
@@ -74,9 +86,6 @@ RUN chmod +x /start.sh
 # Welcome Message
 COPY ./container-template/runpod.txt /etc/runpod.txt
 RUN echo 'cat /etc/runpod.txt' >> /root/.bashrc
-
-# Set the default working directory
-WORKDIR /workspace
 
 # Set the default command for the container
 CMD [ "/start.sh" ]

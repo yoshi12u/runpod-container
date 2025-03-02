@@ -96,7 +96,6 @@ start_jupyter() {
             --MappingKernelManager.cull_idle_timeout=$((JUPYTER_IDLE_TIMEOUT * 60)) \
             --MappingKernelManager.cull_interval=60 \
             --MappingKernelManager.cull_connected=True \
-            --ServerApp.shutdown_no_activity_timeout=$((JUPYTER_IDLE_TIMEOUT * 60)) \
             &> /jupyter.log &
         
         # Store the Jupyter process ID
