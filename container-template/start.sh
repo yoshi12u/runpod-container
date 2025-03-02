@@ -99,8 +99,8 @@ start_jupyter() {
     fi
 }
 
-# Monitor Jupyter and shutdown container when it exits
-monitor_jupyter_and_shutdown() {
+# Monitor Jupyter
+monitor_jupyter() {
     if [[ -f /jupyter.pid ]]; then
         JUPYTER_PID=$(cat /jupyter.pid)
         echo "Monitoring Jupyter process (PID: $JUPYTER_PID)..."
@@ -110,18 +110,18 @@ monitor_jupyter_and_shutdown() {
             while true; do
                 # Check if the Jupyter Lab process is running
                 if ! pgrep -f "jupyter-lab" > /dev/null; then
-                    echo "Jupyter Lab process not found. Shutting down container..."
-                    # Give some time for cleanup
-                    sleep 5
-                    # Exit the container
-                    kill 1
+                    jupyter_callback
                 fi
-                echo "Jupyter Lab is running."
                 # Sleep for 10 seconds before checking again
                 sleep 10
             done
         ) &
     fi
+}
+
+# Callback for when Jupyter Lab process is not found
+jupyter_callback() {
+    echo "Jupyter Lab process not found. Shutting down container..."
 }
 
 # ---------------------------------------------------------------------------- #
@@ -137,7 +137,7 @@ echo "Pod Started"
 setup_ssh
 start_jupyter
 export_env_vars
-monitor_jupyter_and_shutdown
+monitor_jupyter
 
 execute_script "/post_start.sh" "Running post-start script..."
 
