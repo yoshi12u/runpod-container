@@ -96,27 +96,12 @@ start_jupyter() {
             --MappingKernelManager.cull_interval=60 \
             --MappingKernelManager.cull_connected=True \
             &> /jupyter.log &
+        
+        # Get the PID of the Jupyter Lab process
+        JUPYTER_PID=$!
+        echo "Jupyter Lab process ID: ${JUPYTER_PID}"
+        echo $JUPYTER_PID > /jupyter.pid
     fi
-}
-
-# Monitor Jupyter
-monitor_jupyter() {
-    # Start monitoring in background
-    (
-        while true; do
-            # Check if the Jupyter Lab process is running
-            if ! pgrep -f "jupyter-lab" > /dev/null; then
-                jupyter_callback
-            fi
-            # Sleep for 10 seconds before checking again
-            sleep 10
-        done
-    ) &
-}
-
-# Callback for when Jupyter Lab process is not found
-jupyter_callback() {
-    echo "Jupyter Lab process not found. Shutting down container..."
 }
 
 # ---------------------------------------------------------------------------- #
@@ -132,11 +117,10 @@ echo "Pod Started"
 setup_ssh
 start_jupyter
 export_env_vars
-monitor_jupyter
 
 execute_script "/post_start.sh" "Running post-start script..."
 
 echo "Start script(s) finished, pod is ready to use."
-echo "Jupyter will automatically shutdown after ${JUPYTER_IDLE_TIMEOUT:-60} minutes of inactivity, which will terminate the container."
+echo "Jupyter will automatically shutdown after ${JUPYTER_IDLE_TIMEOUT:-60} minutes of inactivity."
 
 sleep infinity
