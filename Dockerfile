@@ -58,7 +58,7 @@ RUN pip install --upgrade --no-cache-dir pip && \
 # Create venv and install Python packages
 RUN if [ -n "${PYTHON_VERSION}" ]; then \
     uv venv --python ${PYTHON_VERSION} && \
-    uv add jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 && \
+    uv pip install jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 && \
     uv run jupyter contrib nbextension install --user && \
     uv run jupyter nbextension enable --py widgetsnbextension; \
     fi
