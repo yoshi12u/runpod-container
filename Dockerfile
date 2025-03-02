@@ -64,7 +64,7 @@ RUN if [ -n "${PYTHON_VERSION}" ]; then \
     fi
 
 # Activate venv
-RUN source .venv/bin/activate
+RUN echo "source .venv/bin/activate" >> /root/.bashrc
 
 # Remove existing SSH host keys
 RUN rm -f /etc/ssh/ssh_host_*
