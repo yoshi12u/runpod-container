@@ -144,5 +144,4 @@ execute_script "/post_start.sh" "Running post-start script..."
 echo "Start script(s) finished, pod is ready to use."
 echo "Jupyter will automatically shutdown after ${JUPYTER_IDLE_TIMEOUT:-60} minutes of inactivity, which will terminate the container."
 
-# Wait for signals
-wait
+sleep infinity
