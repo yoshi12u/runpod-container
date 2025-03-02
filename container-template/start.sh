@@ -101,22 +101,17 @@ start_jupyter() {
 
 # Monitor Jupyter
 monitor_jupyter() {
-    if [[ -f /jupyter.pid ]]; then
-        JUPYTER_PID=$(cat /jupyter.pid)
-        echo "Monitoring Jupyter process (PID: $JUPYTER_PID)..."
-        
-        # Start monitoring in background
-        (
-            while true; do
-                # Check if the Jupyter Lab process is running
-                if ! pgrep -f "jupyter-lab" > /dev/null; then
-                    jupyter_callback
-                fi
-                # Sleep for 10 seconds before checking again
-                sleep 10
-            done
-        ) &
-    fi
+    # Start monitoring in background
+    (
+        while true; do
+            # Check if the Jupyter Lab process is running
+            if ! pgrep -f "jupyter-lab" > /dev/null; then
+                jupyter_callback
+            fi
+            # Sleep for 10 seconds before checking again
+            sleep 10
+        done
+    ) &
 }
 
 # Callback for when Jupyter Lab process is not found
