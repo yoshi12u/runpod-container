@@ -82,25 +82,11 @@ export_env_vars() {
 # Start jupyter lab with idle timeout
 start_jupyter() {
     if [[ $JUPYTER_PASSWORD ]]; then
-        # Set default idle timeout to 60 minutes if not specified
-        JUPYTER_IDLE_TIMEOUT=${JUPYTER_IDLE_TIMEOUT:-60}
-        echo "Starting Jupyter Lab with idle timeout of ${JUPYTER_IDLE_TIMEOUT} minutes..."
+        echo "Starting Jupyter Lab..."
         mkdir -p /workspace && \
-        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* \
-            --FileContentsManager.delete_to_trash=False \
-            --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' \
-            --ServerApp.token=$JUPYTER_PASSWORD \
-            --ServerApp.allow_origin=* \
-            --ServerApp.preferred_dir=/workspace \
-            --MappingKernelManager.cull_idle_timeout=$((JUPYTER_IDLE_TIMEOUT * 60)) \
-            --MappingKernelManager.cull_interval=60 \
-            --MappingKernelManager.cull_connected=True \
-            &> /jupyter.log &
-        
-        # Get the PID of the Jupyter Lab process
-        JUPYTER_PID=$!
-        echo "Jupyter Lab process ID: ${JUPYTER_PID}"
-        echo $JUPYTER_PID > /jupyter.pid
+        cd / && \
+        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
+        echo "Jupyter Lab started"
     fi
 }
 
@@ -121,6 +107,5 @@ export_env_vars
 execute_script "/post_start.sh" "Running post-start script..."
 
 echo "Start script(s) finished, pod is ready to use."
-echo "Jupyter will automatically shutdown after ${JUPYTER_IDLE_TIMEOUT:-60} minutes of inactivity."
 
 sleep infinity
