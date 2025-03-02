@@ -96,11 +96,6 @@ start_jupyter() {
             --MappingKernelManager.cull_interval=60 \
             --MappingKernelManager.cull_connected=True \
             &> /jupyter.log &
-        
-        # Store the Jupyter process ID
-        JUPYTER_PID=$!
-        echo "Jupyter Lab started with PID: $JUPYTER_PID"
-        echo $JUPYTER_PID > /jupyter.pid
     fi
 }
 
@@ -112,22 +107,19 @@ monitor_jupyter_and_shutdown() {
         
         # Start monitoring in background
         (
-            # Wait for the Jupyter process to finish
-            while ps -p $JUPYTER_PID > /dev/null 2>&1; do
-                echo "Jupyter process is still running. Container will continue running."
+            while true; do
+                # Check if the Jupyter Lab process is running
+                if ! pgrep -f "jupyter-lab" > /dev/null; then
+                    echo "Jupyter Lab process not found. Shutting down container..."
+                    # Give some time for cleanup
+                    sleep 5
+                    # Exit the container
+                    kill 1
+                fi
+                echo "Jupyter Lab is running."
+                # Sleep for 10 seconds before checking again
                 sleep 10
             done
-            
-            # Double check if the process is really gone
-            if ! ps -p $JUPYTER_PID > /dev/null 2>&1; then
-                echo "Jupyter process has terminated. Shutting down container..."
-                # Give some time for cleanup
-                sleep 5
-                # Exit the container
-                kill 1
-            else
-                echo "Jupyter process is still running. Container will continue running."
-            fi
         ) &
     fi
 }
