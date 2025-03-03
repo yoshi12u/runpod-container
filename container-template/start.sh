@@ -79,7 +79,17 @@ export_env_vars() {
     echo 'source /etc/rp_environment.nu' >> ~/.config/nushell/config.nu
 }
 
-
+# Setup Python virtual environment
+setup_python() {
+    echo "Setting up Python virtual environment..."
+    if [ ! -d "/workspace/.venv" ]; then
+        echo "Setting up virtual environment..."
+        uv venv --python ${PYTHON_VERSION}
+        uv pip install jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 && \
+        uv run jupyter contrib nbextension install --user && \
+        uv run jupyter nbextension enable --py widgetsnbextension; \
+    fi
+}
 
 # Start jupyter lab with idle timeout
 start_jupyter() {
@@ -103,10 +113,10 @@ execute_script "/pre_start.sh" "Running pre-start script..."
 
 echo "Pod Started"
 
+setup_python
 setup_ssh
-export_env_vars
-source /workspace/.venv/bin/activate
 start_jupyter
+export_env_vars
 
 execute_script "/post_start.sh" "Running post-start script..."
 
