@@ -79,13 +79,15 @@ export_env_vars() {
     echo 'source /etc/rp_environment.nu' >> ~/.config/nushell/config.nu
 }
 
+
+
 # Start jupyter lab with idle timeout
 start_jupyter() {
     if [[ $JUPYTER_PASSWORD ]]; then
         echo "Starting Jupyter Lab..."
         mkdir -p /workspace && \
         cd / && \
-        nohup jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
+        nohup uv run jupyter lab --allow-root --no-browser --port=8888 --ip=* --FileContentsManager.delete_to_trash=False --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' --ServerApp.token=$JUPYTER_PASSWORD --ServerApp.allow_origin=* --ServerApp.preferred_dir=/workspace &> /jupyter.log &
         echo "Jupyter Lab started"
     fi
 }
@@ -93,6 +95,7 @@ start_jupyter() {
 # ---------------------------------------------------------------------------- #
 #                               Main Program                                   #
 # ---------------------------------------------------------------------------- #
+
 
 start_nginx
 
@@ -103,6 +106,7 @@ echo "Pod Started"
 setup_ssh
 start_jupyter
 export_env_vars
+source /workspace/.venv/bin/activate
 
 execute_script "/post_start.sh" "Running post-start script..."
 

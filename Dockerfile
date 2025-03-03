@@ -30,8 +30,6 @@ RUN apt-get update --yes && \
     # Install Rust-based CLI tools
     . "$HOME/.cargo/env" && \
     cargo install nu starship bat lsd && \
-    # Add cargo binaries to PATH
-    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc && \
     # Set up starship prompt
     echo 'eval "$(starship init bash)"' >> /root/.bashrc && \
     apt-get autoremove -y && \
@@ -62,9 +60,6 @@ RUN if [ -n "${PYTHON_VERSION}" ]; then \
     uv run jupyter contrib nbextension install --user && \
     uv run jupyter nbextension enable --py widgetsnbextension; \
     fi
-
-# Activate venv
-RUN echo "source /workspace/.venv/bin/activate" >> /root/.bashrc
 
 # Remove existing SSH host keys
 RUN rm -f /etc/ssh/ssh_host_*
