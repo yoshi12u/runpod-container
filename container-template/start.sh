@@ -85,9 +85,15 @@ setup_python() {
     if [ ! -d "/workspace/.venv" ]; then
         echo "Setting up virtual environment..."
         uv venv --python ${PYTHON_VERSION}
-        uv pip install jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 && \
-        uv run jupyter contrib nbextension install --user && \
-        uv run jupyter nbextension enable --py widgetsnbextension; \
+    fi
+    echo "Installing Python packages..."
+    uv pip install jupyterlab ipywidgets jupyter-archive jupyter_contrib_nbextensions notebook==6.5.5 && \
+    uv run jupyter contrib nbextension install --user && \
+    uv run jupyter nbextension enable --py widgetsnbextension; \
+    cd /workspace
+    if [ -f "pyproject.toml" ]; then
+        echo "Found pyproject.toml, syncing dependencies..."
+        uv sync
     fi
 }
 
