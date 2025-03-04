@@ -110,9 +110,9 @@ start_jupyter() {
 
 # Setup GitHub CLI
 setup_gh() {
-    if [[ $GITHUB_TOKEN ]]; then
+    if [[ $GITHUB_PAT ]]; then
         echo "Setting up gh..."
-        gh auth login --with-token <<< "$GITHUB_TOKEN"
+        gh auth login --with-token <<< "$GITHUB_PAT"
     fi
 }
 
