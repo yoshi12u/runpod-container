@@ -4,30 +4,44 @@
 - To build a specific target, use `docker buildx bake <target>`.
 - To specify the platform, use `docker buildx bake <target> --set <target>.platform=linux/amd64`.
 
-Example:
+## Google Cloud Authentication
+
+This container includes Google Cloud SDK for accessing Google Cloud services. To authenticate with Google Cloud, you can use one of the following methods:
+
+### Using Application Default Credentials
+
+Set the `GOOGLE_APPLICATION_CREDENTIALS_JSON` environment variable with the contents of your application default credentials JSON file:
 
 ```bash
-docker buildx bake 240-py311-cuda1241-devel-ubuntu2204 --set 240-py311-cuda1241-devel-ubuntu2204.platform=linux/amd64
+# When running the container locally
+docker run -e GOOGLE_APPLICATION_CREDENTIALS_JSON="$(cat /path/to/your/credentials.json)" ...
+
+# When using RunPod
+# Add GOOGLE_APPLICATION_CREDENTIALS_JSON as a Secret in the RunPod UI
 ```
 
-## Exposed Ports
+### Using Service Account Key
 
-- 22/tcp (SSH)
-- 8888/tcp (Jupyter Lab)
-
-## Jupyter Lab Auto-Shutdown
-
-This container includes an automatic shutdown feature for Jupyter Lab:
-
-- Jupyter Lab will automatically shut down after a period of inactivity (default: 60 minutes)
-- When Jupyter Lab shuts down, the container will also terminate
-- You can customize the idle timeout by setting the `JUPYTER_IDLE_TIMEOUT` environment variable (in minutes)
-
-Example:
+Set the `GOOGLE_SERVICE_ACCOUNT_KEY_JSON` environment variable with the contents of your service account key JSON file:
 
 ```bash
-# Run with a 30-minute idle timeout
-docker run -e JUPYTER_IDLE_TIMEOUT=30 -e JUPYTER_PASSWORD=yourpassword your-image-name
+# When running the container locally
+docker run -e GOOGLE_SERVICE_ACCOUNT_KEY_JSON="$(cat /path/to/your/service-account-key.json)" ...
+
+# When using RunPod
+# Add GOOGLE_SERVICE_ACCOUNT_KEY_JSON as a Secret in the RunPod UI
 ```
 
-This feature helps save resources by automatically stopping containers that are no longer in use.
+### Setting Project ID
+
+You can also set the Google Cloud project ID:
+
+```bash
+# When running the container locally
+docker run -e GOOGLE_PROJECT_ID="your-project-id" ...
+
+# When using RunPod
+# Add GOOGLE_PROJECT_ID as a Secret in the RunPod UI
+```
+
+After the container starts, the Google Cloud SDK will be automatically configured with your credentials.

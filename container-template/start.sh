@@ -108,6 +108,14 @@ start_jupyter() {
     fi
 }
 
+# Setup GitHub CLI
+setup_gh() {
+    if [[ $GITHUB_TOKEN ]]; then
+        echo "Setting up gh..."
+        gh auth login --with-token <<< "$GITHUB_TOKEN"
+    fi
+}
+
 # ---------------------------------------------------------------------------- #
 #                               Main Program                                   #
 # ---------------------------------------------------------------------------- #
@@ -121,6 +129,7 @@ echo "Pod Started"
 
 setup_python
 setup_ssh
+setup_gh
 start_jupyter
 export_env_vars
 
