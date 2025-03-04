@@ -9,7 +9,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL=/bin/bash
 ENV VIRTUAL_ENV=/workspace/.venv
-ENV JUPYTER_IDLE_TIMEOUT=60
 
 # Set the working directory
 WORKDIR /
@@ -20,7 +19,16 @@ RUN mkdir /workspace
 # Update, upgrade, install packages, install python if PYTHON_VERSION is specified, clean up
 RUN apt-get update --yes && \
     apt-get upgrade --yes && \
-    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server build-essential libssl-dev pkg-config cmake unzip fontconfig nginx fzf ripgrep neovim && \
+    apt install --yes --no-install-recommends git wget curl bash libgl1 software-properties-common openssh-server build-essential libssl-dev pkg-config cmake unzip fontconfig nginx fzf ripgrep && \
+    # Install GitHub CLI
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt install --yes --no-install-recommends gh && \
+    # Install Helix editor
+    add-apt-repository ppa:maveonair/helix-editor && \
+    apt install --yes --no-install-recommends helix && \
+    # Install Python if PYTHON_VERSION is specified
     if [ -n "${PYTHON_VERSION}" ]; then \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" -y --no-install-recommends; \
